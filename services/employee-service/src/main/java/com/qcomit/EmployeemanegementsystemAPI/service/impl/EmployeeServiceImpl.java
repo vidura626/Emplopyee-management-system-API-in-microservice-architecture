@@ -36,7 +36,6 @@ import java.util.Objects;
 import static java.util.stream.Collectors.toList;
 
 @Service
-@Transactional
 public class EmployeeServiceImpl implements EmployeeService {
 
     private final EmployeeRepository employeeRepository;
@@ -77,7 +76,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     private UserDto saveUserDetailsInUserService(UserDto user, WebClient webClient) {
         return webClient.post()
-                .uri("http://localhost:8082/api/v1/user")
+                .uri("lb://user-service/api/v1/user")
                 .bodyValue(user)
                 .retrieve()
                 .bodyToMono(UserDto.class)
@@ -124,7 +123,8 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     private UserDto getUserDetailsFromUserService(Long id, WebClient webClient) {
         return webClient.get()
-                .uri("http://localhost:8082/api/v1/user/" + id)
+//                .uri("http://localhost:8082/api/v1/user/" + id)
+                .uri("lb://user-service/api/v1/user/" + id)
                 .retrieve()
                 .bodyToMono(UserDto.class)
                 .doOnError(throwable -> {
@@ -155,7 +155,8 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     private void deleteUserDetailsFromUserService(Long userId, WebClient webClient) {
         webClient.delete()
-                .uri("http://localhost:8082/api/v1/user/" + userId)
+//                .uri("http://localhost:8082/api/v1/user/" + userId)
+                .uri("lb://user-service/api/v1/user/" + userId)
                 .retrieve()
                 .bodyToMono(String.class)
                 .doOnError(throwable -> {
@@ -243,7 +244,8 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     private List getAllFromUserAPI(WebClient webClient) {
         return webClient.get()
-                .uri("http://localhost:8082/api/v1/user")
+//                .uri("http://localhost:8082/api/v1/user")
+                .uri("lb://user-service/api/v1/user")
                 .retrieve()
                 .bodyToMono(List.class)
                 .doOnError(throwable -> {

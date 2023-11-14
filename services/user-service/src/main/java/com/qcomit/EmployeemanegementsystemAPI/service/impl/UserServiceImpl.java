@@ -44,7 +44,8 @@ public class UserServiceImpl implements UserService {
     public EmployeeDto findEmployeeByUserId(Long userId, String token) {
         WebClient webClient = webClientBuilder.build();
         EmployeeDto employeeDto = webClient.get()
-                .uri("http://localhost:8081/api/v1/employee/userId/" + userId)
+//                .uri("http://localhost:8081/api/v1/employee/userId/" + userId)
+                .uri("lb://employee-service/api/v1/employee/userId/" + userId)
                 .header("Authorization", "Bearer " + token)
                 .retrieve()
                 .bodyToMono(EmployeeDto.class)
