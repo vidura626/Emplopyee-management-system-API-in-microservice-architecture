@@ -17,11 +17,21 @@ spring:
             allowedMethods: "*"
             allowedHeaders: "*"
       routes:
+
         - id: login-service
           uri: lb://user-service
           predicates:
             - Path=/api/v1/user/login
+
+        - id: register-service
+          uri: lb://employee-service
+          predicates:
+            - Path=/api/v1/employee
+            - Method=POST
+
         - id: employee-service
           uri: lb://employee-service
           predicates:
             - Path=/api/v1/employee/**
+          filters:
+            - AuthenticationFilter
