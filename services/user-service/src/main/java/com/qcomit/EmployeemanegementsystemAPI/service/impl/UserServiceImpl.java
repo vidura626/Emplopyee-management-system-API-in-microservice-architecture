@@ -42,8 +42,8 @@ public class UserServiceImpl implements UserService {
     public EmployeeDto findEmployeeByUserId(Long userId, String token) {
         WebClient webClient = webClientBuilder.build();
         EmployeeDto employeeDto = webClient.get()
-                .uri("http://localhost:8081/api/v1/employee/" + userId)
-                .header("Authorization", token)
+                .uri("http://localhost:8081/api/v1/employee/userId/" + userId)
+                .header("Authorization", "Bearer " + token)
                 .retrieve()
                 .bodyToMono(EmployeeDto.class)
                 .doOnError(throwable -> {
@@ -60,6 +60,19 @@ public class UserServiceImpl implements UserService {
             return mapper.toDto(userRepository.save(mapper.toEntity(user)));
         }
         throw new NotFoundException("Username already exist. Username : " + user.getUsername());
+    }
+
+    @Override
+    public void updateUser(UserDto user) {
+        User byUsername = userRepository.findByUsername(user.getUsername());
+        if (byUsername == null) {
+            throw new NotFoundException("User not found with username " + user.getUsername());
+        }
+
+        if (!user.getPassword().isBlank() && user.getPassword() != null) {
+            byUsername.setPassword(user.getPassword());
+        }
+        userRepository.save(byUsername);
     }
 
 }

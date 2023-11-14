@@ -10,7 +10,7 @@ import java.util.List;
 public interface EmployeeService {
     public Long saveEmployee(EmployeeDto employee) throws IOException;
 
-    public EmployeeDto updateEmployee(EmployeeDto employee, Long id);
+    public EmployeeDto updateEmployee(EmployeeDto employee, Long id, String token);
 
     public void deleteEmployee(Long id);
 
@@ -26,4 +26,6 @@ public interface EmployeeService {
     public void refreshEmployeeAgeWithDays();
 
     EmployeeDto findEmployeeByUserDto(UserDto user);
+
+    EmployeeDto findEmployeeByUserId(Long id);
 }

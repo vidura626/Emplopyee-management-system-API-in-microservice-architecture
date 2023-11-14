@@ -53,7 +53,9 @@ public class SecurityConfig {
                     req
                             .requestMatchers("/api/v1/user/login").authenticated()
                             .requestMatchers(HttpMethod.POST, "/api/v1/user")
-                            .permitAll();
+                            .permitAll()
+                            .requestMatchers(HttpMethod.POST, "/api/v1/user")
+                            .hasAnyRole("USER", "ADMIN");
                 });
 
         http.httpBasic(withDefaults());

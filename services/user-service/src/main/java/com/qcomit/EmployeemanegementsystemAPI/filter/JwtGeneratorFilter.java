@@ -38,12 +38,18 @@ public class JwtGeneratorFilter extends OncePerRequestFilter {
                     .issuedAt(new Date(System.currentTimeMillis()))
                     .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 48))
                     .compact();
+            request.setAttribute("token", jwt);
             response.setHeader(SecurityConstant.JWT_HEADER_NAME, jwt);
+
         }
+
+        filterChain.doFilter(request, response);
     }
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         return !request.getServletPath().equals("/api/v1/user/login");
     }
+
+
 }

@@ -36,6 +36,11 @@ public class EmployeeController {
         return ResponseEntity.ok(employeeService.findEmployeeById(Long.parseLong(id)));
     }
 
+    @GetMapping("/userId/{id}")
+    public ResponseEntity<EmployeeDto> findEmployeeByUserId(@PathVariable String id) {
+        return ResponseEntity.ok(employeeService.findEmployeeByUserId(Long.parseLong(id)));
+    }
+
 
     @GetMapping
     public ResponseEntity<List<EmployeeDto>> findEmployees() {
@@ -79,12 +84,14 @@ public class EmployeeController {
 
 
     @PutMapping
-    public ResponseEntity<EmployeeDto> updateEmployee(@RequestBody @Valid EmployeeDto employee, @RequestParam("id") Long id) {
+    public ResponseEntity<EmployeeDto> updateEmployee(@RequestBody @Valid EmployeeDto employee,
+                                                      @RequestParam("id") Long id,
+                                                      @RequestHeader("Authorization") String token) {
         employee.setRole("ROLE_" + employee.getRole());
         if (employee.getPassword() != null) {
             employee.setPassword(passwordEncoder.encode(employee.getPassword()));
         }
-        return ResponseEntity.ok(employeeService.updateEmployee(employee, id));
+        return ResponseEntity.ok(employeeService.updateEmployee(employee, id, token));
     }
 
 

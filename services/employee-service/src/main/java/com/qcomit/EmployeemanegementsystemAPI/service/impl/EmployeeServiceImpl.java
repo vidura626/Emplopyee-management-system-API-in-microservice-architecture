@@ -50,15 +50,10 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         WebClient webClient = webClientBuilder.build();
 
-                //todo: Call to user service to check the user
-                UserDto build = UserDto.builder()
-                .username(employee.getUsername())
-                .role(employee.getRole())
-                .password(employee.getPassword())
-                .build();
+        UserDto user = buildUserDetails(employee);
         UserDto userDto = webClient.post()
                 .uri("http://localhost:8082/api/v1/user")
-                .bodyValue(build)
+                .bodyValue(user)
                 .retrieve()
                 .bodyToMono(UserDto.class)
                 .doOnError(throwable -> {
@@ -76,6 +71,16 @@ public class EmployeeServiceImpl implements EmployeeService {
         }
     }
 
+    private UserDto buildUserDetails(EmployeeDto employee) {
+        UserDto build = UserDto.builder()
+                .username(employee.getUsername())
+                .role(employee.getRole())
+                .build();
+        if (employee.getPassword() != null || !employee.getPassword().isEmpty())
+            build.setPassword(employee.getPassword());
+        return build;
+    }
+
     private void setCurrentAgeWithDays(Employee entity) {
         entity.setCurrent_age_in_days(
                 (int) Duration.between(
@@ -84,10 +89,10 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
-    public EmployeeDto updateEmployee(EmployeeDto employee, Long id) {
+    public EmployeeDto updateEmployee(EmployeeDto employee, Long id, String token) {
         Employee entity = employeeRepository.findById(id).orElseThrow(() -> new NotFoundException("Employee not found. Id: " + id));
 
-        setUpdateEntity(entity, employee);
+        setUpdateEntity(entity, employee, token);
         setCurrentAgeWithDays(entity);
 
         entity.setModified(new Date(System.currentTimeMillis()));
@@ -96,14 +101,27 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     }
 
-    private void setUpdateEntity(Employee entity, EmployeeDto employee) {
+    private void setUpdateEntity(Employee entity, EmployeeDto employee, String token) {
         entity.setName(Name.builder().firstName(employee.getFirstName()).lastName(employee.getLastName()).build());
         entity.setBirthday(employee.getBirthday());
         entity.setEmail(employee.getEmail());
 
-        //todo use webflux
-//        if (employee.getPassword() != null && !employee.getPassword().isEmpty())
-//            entity.getUser().setPassword(employee.getPassword());
+        WebClient webClient = webClientBuilder.build();
+        UserDto userDto = buildUserDetails(employee);
+        Boolean isUpdated = webClient.put()
+                .uri("http://localhost:8082/api/v1/user")
+                .header("Authorization", token)
+                .bodyValue(userDto)
+                .retrieve()
+                .bodyToMono(Boolean.class)
+                .doOnError(throwable -> {
+                    throw new NotFoundException("User not found.");
+                })
+                .block();
+
+        if (Boolean.FALSE.equals(isUpdated)) {
+            throw new NotFoundException("User not found.");
+        }
 
         entity.setAddress(mapper.toEntity(employee.getAddress()));
         entity.setContacts(mapper.toContactEntity(employee.getContacts()));
@@ -178,5 +196,14 @@ public class EmployeeServiceImpl implements EmployeeService {
 //        }
 //        return mapper.toDto(employeeRepository.findEmployeeByUser(mapper.toEntity(user)));
         return null;
+    }
+
+    @Override
+    public EmployeeDto findEmployeeByUserId(Long id) {
+        Employee byUserId = employeeRepository.findByUserId(id);
+        if (byUserId == null) {
+            throw new NotFoundException("Employee not found. Id: " + id);
+        }
+        return mapper.toDto(byUserId);
     }
 }

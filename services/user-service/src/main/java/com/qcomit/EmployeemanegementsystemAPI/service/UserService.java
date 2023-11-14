@@ -12,4 +12,6 @@ public interface UserService {
     EmployeeDto findEmployeeByUserId(Long userId, String token);
 
     UserDto saveUser(UserDto user);
+
+    void updateUser(UserDto user);
 }
