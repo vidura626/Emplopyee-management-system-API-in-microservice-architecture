@@ -1,6 +1,5 @@
 package com.qcomit.EmployeemanegementsystemAPI.config;
 
-import com.qcomit.EmployeemanegementsystemAPI.filter.JwtGeneratorFilter;
 import com.qcomit.EmployeemanegementsystemAPI.filter.JwtValidationFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.context.annotation.Bean;
@@ -48,7 +47,6 @@ public class SecurityConfig {
                         }))
                 .csrf(AbstractHttpConfigurer::disable)
                 .addFilterBefore(new JwtValidationFilter(), BasicAuthenticationFilter.class)
-                .addFilterAfter(new JwtGeneratorFilter(), BasicAuthenticationFilter.class)
                 .authorizeHttpRequests(req -> {
                     req
                             .requestMatchers(HttpMethod.GET,
@@ -64,8 +62,7 @@ public class SecurityConfig {
                             .requestMatchers(HttpMethod.POST, "/api/v1/employee/**")
                             .hasAnyRole("ADMIN", "USER")
                             .requestMatchers(HttpMethod.GET, "/api/v1/employee/**")
-                            .hasAnyRole("ADMIN", "USER")
-                            .requestMatchers("/api/v1/user/login").authenticated();
+                            .hasAnyRole("ADMIN", "USER");
                 });
 
         http.httpBasic(withDefaults());
