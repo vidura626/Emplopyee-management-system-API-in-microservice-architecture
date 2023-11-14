@@ -8,21 +8,31 @@ import com.qcomit.EmployeemanegementsystemAPI.repository.EmployeeRepository;
 import com.qcomit.EmployeemanegementsystemAPI.service.EmployeeService;
 import com.qcomit.EmployeemanegementsystemAPI.service.exceptions.AlreadyExistException;
 import com.qcomit.EmployeemanegementsystemAPI.service.exceptions.NotFoundException;
+import com.qcomit.EmployeemanegementsystemAPI.util.constants.SecurityConstant;
 import com.qcomit.EmployeemanegementsystemAPI.util.mappers.Mapper;
 import com.qcomit.EmployeemanegementsystemAPI.util.properties.StorageProperties;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import javax.crypto.SecretKey;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.time.Duration;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Objects;
+
+import static java.util.stream.Collectors.toList;
 
 @Service
 public class EmployeeServiceImpl implements EmployeeService {
@@ -136,6 +146,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         //todo get username from token
 //        employee.getUser().getUsername()
         String username = "username";
+
         return storageProperties.getProfileImage() + "Profile-image-" + username
                 + Objects.requireNonNull(image.getOriginalFilename()).substring(image.getOriginalFilename().lastIndexOf("."));
     }
@@ -149,8 +160,49 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
-    public List<EmployeeDto> findAllEmployees() {
-        return mapper.toDto(employeeRepository.findAll());
+    public List<EmployeeDto> findAllEmployees(String token) {
+
+        WebClient webClient = webClientBuilder
+                .defaultHeader(HttpHeaders.AUTHORIZATION, token)
+                .build();
+        List userDtos = webClient.get()
+                .uri("http://localhost:8082/api/v1/user")
+                .retrieve()
+                .bodyToMono(List.class)
+                .doOnError(throwable -> {
+                    throw new RuntimeException("Something wend wrong!");
+                })
+                .block();
+
+        if (userDtos == null) throw new NotFoundException("Users not found");
+
+        List<Employee> allEmployees = employeeRepository.findAll();
+
+        List<UserDto> userDtoList = ((List<LinkedHashMap<String, Object>>) userDtos).stream()
+                .map(user -> UserDto.builder()
+                        .user_id(Long.parseLong(user.get("user_id").toString()))
+                        .username(user.get("username").toString())
+                        .role(user.get("role").toString())
+                        .build())
+                .toList();
+
+        System.out.println(userDtoList);
+
+
+        List<EmployeeDto> collect = allEmployees.stream()
+                .map(employee -> {
+                    EmployeeDto dto = mapper.toDto(employee);
+                    (userDtoList).stream()
+                            .filter(userDto -> userDto.getUser_id().equals(employee.getUserId()))
+                            .findFirst()
+                            .ifPresent(userDto -> {
+                                dto.setUsername(userDto.getUsername());
+                                dto.setRole(userDto.getRole());
+                            });
+                    return dto;
+                }).collect(toList());
+
+        return collect;
     }
 
     @Override
@@ -187,5 +239,16 @@ public class EmployeeServiceImpl implements EmployeeService {
             throw new NotFoundException("Employee not found. Id: " + id);
         }
         return mapper.toDto(byUserId);
+    }
+
+    @Override
+    public Claims extractToken(String token) {
+        token = token.startsWith("Bearer ") ? token.substring("Bearer ".length()) : token;
+        SecretKey secretKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(SecurityConstant.SECRET_KEY));
+        return (Claims) Jwts.parser()
+                .verifyWith(secretKey)
+                .build()
+                .parse(token)
+                .getPayload();
     }
 }

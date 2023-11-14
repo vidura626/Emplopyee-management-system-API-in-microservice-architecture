@@ -43,10 +43,10 @@ public class EmployeeController {
 
 
     @GetMapping
-    public ResponseEntity<List<EmployeeDto>> findEmployees() {
+    public ResponseEntity<List<EmployeeDto>> findEmployees(@RequestHeader("Authorization") String token) {
         return ResponseEntity
                 .ok()
-                .body(employeeService.findAllEmployees());
+                .body(employeeService.findAllEmployees(token));
     }
 
 

@@ -7,6 +7,8 @@ import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
+import java.util.List;
+
 @org.mapstruct.Mapper(componentModel = "spring")
 public interface Mapper {
     Mapper INSTANCE = Mappers.getMapper(Mapper.class);
@@ -32,6 +34,8 @@ public interface Mapper {
 
     @InheritInverseConfiguration
     User toEntity(UserDto dto);
+
+    List<UserDto> toDto(List<User> all);
 
 //    AddressDto toDto(Address entity);
 //

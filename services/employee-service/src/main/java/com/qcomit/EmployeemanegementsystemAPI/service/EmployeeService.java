@@ -2,6 +2,7 @@ package com.qcomit.EmployeemanegementsystemAPI.service;
 
 import com.qcomit.EmployeemanegementsystemAPI.dto.EmployeeDto;
 import com.qcomit.EmployeemanegementsystemAPI.dto.UserDto;
+import io.jsonwebtoken.Claims;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -19,7 +20,7 @@ public interface EmployeeService {
     public byte[] downloadProfileImage(Long employeeId) throws IOException;
 
 
-    public List<EmployeeDto> findAllEmployees();
+    public List<EmployeeDto> findAllEmployees(String token);
 
     public EmployeeDto findEmployeeById(Long id);
 
@@ -28,4 +29,6 @@ public interface EmployeeService {
     EmployeeDto findEmployeeByUserDto(UserDto user);
 
     EmployeeDto findEmployeeByUserId(Long id);
+
+    public Claims extractToken(String token);
 }

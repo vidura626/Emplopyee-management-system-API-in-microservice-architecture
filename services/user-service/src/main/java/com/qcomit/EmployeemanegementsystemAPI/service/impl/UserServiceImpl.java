@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.util.List;
+
 @Service
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
@@ -73,6 +75,11 @@ public class UserServiceImpl implements UserService {
             byUsername.setPassword(user.getPassword());
         }
         userRepository.save(byUsername);
+    }
+
+    @Override
+    public List<UserDto> findAllUsers() {
+        return mapper.toDto(userRepository.findAll());
     }
 
 }

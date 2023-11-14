@@ -3,6 +3,8 @@ package com.qcomit.EmployeemanegementsystemAPI.service;
 import com.qcomit.EmployeemanegementsystemAPI.dto.EmployeeDto;
 import com.qcomit.EmployeemanegementsystemAPI.dto.UserDto;
 
+import java.util.List;
+
 public interface UserService {
 
     boolean existsByUsername(String username);
@@ -14,4 +16,6 @@ public interface UserService {
     UserDto saveUser(UserDto user);
 
     void updateUser(UserDto user);
+
+    List<UserDto> findAllUsers();
 }
