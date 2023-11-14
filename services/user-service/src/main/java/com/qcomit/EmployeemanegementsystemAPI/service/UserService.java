@@ -18,4 +18,6 @@ public interface UserService {
     void updateUser(UserDto user);
 
     List<UserDto> findAllUsers();
+
+    UserDto findById(String id);
 }

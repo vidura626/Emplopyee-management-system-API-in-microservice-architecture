@@ -101,14 +101,30 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     public EmployeeDto updateEmployee(EmployeeDto employee, Long id, String token) {
         Employee entity = employeeRepository.findById(id).orElseThrow(() -> new NotFoundException("Employee not found. Id: " + id));
+        WebClient webClient = webClientBuilder.defaultHeader(HttpHeaders.AUTHORIZATION, token).build();
 
+        UserDto userDetails = getUserDetailsFromUserService(entity.getUserId(), webClient);
+        if (userDetails == null) throw new NotFoundException("User not found with username " + employee.getUsername());
         setUpdateEntity(entity, employee, token);
         setCurrentAgeWithDays(entity);
 
         entity.setModified(new Date(System.currentTimeMillis()));
         Employee save = employeeRepository.save(entity);
-        return mapper.toDto(save);
+        EmployeeDto dto = mapper.toDto(save);
+        dto.setRole(userDetails.getRole());
+        dto.setUsername(userDetails.getUsername());
+        return dto;
+    }
 
+    private UserDto getUserDetailsFromUserService(Long id, WebClient webClient) {
+        return webClient.get()
+                .uri("http://localhost:8082/api/v1/user/" + id)
+                .retrieve()
+                .bodyToMono(UserDto.class)
+                .doOnError(throwable -> {
+                    throw new NotFoundException("User not found with id " + id);
+                })
+                .block();
     }
 
     private void setUpdateEntity(Employee entity, EmployeeDto employee, String token) {
