@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -35,6 +36,7 @@ import java.util.Objects;
 import static java.util.stream.Collectors.toList;
 
 @Service
+@Transactional
 public class EmployeeServiceImpl implements EmployeeService {
 
     private final EmployeeRepository employeeRepository;
@@ -58,10 +60,23 @@ public class EmployeeServiceImpl implements EmployeeService {
             throw new NotFoundException("Role not found.");
         } else employee.setRole("ROLE_" + employee.getRole());
 
+        if (employeeRepository.existsByEmail(employee.getEmail())) {
+            throw new AlreadyExistException("Email already exists. Email: " + employee.getEmail());
+        }
+
         WebClient webClient = webClientBuilder.build();
 
         UserDto user = buildUserDetails(employee);
-        UserDto userDto = webClient.post()
+        UserDto userDto = saveUserDetailsInUserService(user, webClient);
+        Employee entity = mapper.toEntity(employee);
+        entity.setUserId(userDto.getUser_id());
+        setCurrentAgeWithDays(entity);
+        return employeeRepository.save(entity).getEmployee_id();
+
+    }
+
+    private UserDto saveUserDetailsInUserService(UserDto user, WebClient webClient) {
+        return webClient.post()
                 .uri("http://localhost:8082/api/v1/user")
                 .bodyValue(user)
                 .retrieve()
@@ -70,15 +85,6 @@ public class EmployeeServiceImpl implements EmployeeService {
                     throw new AlreadyExistException("Username is already exists");
                 })
                 .block();
-
-        if (employeeRepository.existsByEmail(employee.getEmail())) {
-            throw new AlreadyExistException("Email already exists. Email: " + employee.getEmail());
-        } else {
-            Employee entity = mapper.toEntity(employee);
-            entity.setUserId(userDto.getUser_id());
-            setCurrentAgeWithDays(entity);
-            return employeeRepository.save(entity).getEmployee_id();
-        }
     }
 
     private UserDto buildUserDetails(EmployeeDto employee) {
@@ -86,7 +92,7 @@ public class EmployeeServiceImpl implements EmployeeService {
                 .username(employee.getUsername())
                 .role(employee.getRole())
                 .build();
-        if (employee.getPassword() != null || !employee.getPassword().isEmpty())
+        if (employee.getPassword() != null && !employee.getPassword().isEmpty())
             build.setPassword(employee.getPassword());
         return build;
     }
