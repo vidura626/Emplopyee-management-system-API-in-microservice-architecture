@@ -38,11 +38,11 @@ public class SecurityConfig {
                             public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
                                 CorsConfiguration configuration = new CorsConfiguration();
                                 configuration.setAllowedOriginPatterns(List.of("*"));
-                                configuration.setMaxAge(3600L);
-                                configuration.setExposedHeaders(List.of("Authorization"));
                                 configuration.setAllowedMethods(List.of("*"));
-                                configuration.setAllowCredentials(true);
                                 configuration.setAllowedHeaders(List.of("*"));
+                                configuration.setMaxAge(3600L);
+                                configuration.setAllowCredentials(true);
+                                configuration.setExposedHeaders(List.of("Authorization"));
                                 return configuration;
                             }
                         }))
