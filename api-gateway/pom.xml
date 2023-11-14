@@ -9,7 +9,7 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.qcomit</groupId>
-	<artifactId>gateway-service</artifactId>
+	<artifactId>api-gateway</artifactId>
 	<version>0.0.1.0</version>
 	<name>gateway-service</name>
 	<description>Gateway-service</description>

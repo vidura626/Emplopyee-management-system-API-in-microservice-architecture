@@ -19,7 +19,7 @@
     <modules>
         <module>services/user-service</module>
         <module>services/employee-service</module>
-        <module>gateway-service</module>
+        <module>api-gateway</module>
         <module>discovery-server</module>
     </modules>
     <properties>
