@@ -60,8 +60,10 @@ public class SecurityConfig {
                             .hasAnyRole("USER", "ADMIN")
                             .requestMatchers(HttpMethod.GET, "/api/v1/user")
                             .hasRole("ADMIN")
+                            .requestMatchers(HttpMethod.DELETE)
+                            .hasRole("ADMIN")
                             .requestMatchers(HttpMethod.GET, "/api/v1/user/**")
-                            .hasAnyRole("ADMIN","USER");
+                            .hasAnyRole("ADMIN", "USER");
 
                 });
 

@@ -78,8 +78,9 @@ public class EmployeeController {
 
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteEmployee(@PathVariable("id") String id) {
-        employeeService.deleteEmployee(Long.parseLong(id));
+    public ResponseEntity<String> deleteEmployee(@PathVariable("id") String id,
+                                                 @RequestHeader("Authorization") String token) {
+        employeeService.deleteEmployee(Long.parseLong(id), token);
         return ResponseEntity.ok().body("Deleted");
     }
 

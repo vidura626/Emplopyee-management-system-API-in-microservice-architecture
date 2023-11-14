@@ -13,7 +13,7 @@ public interface EmployeeService {
 
     public EmployeeDto updateEmployee(EmployeeDto employee, Long id, String token);
 
-    public void deleteEmployee(Long id);
+    public void deleteEmployee(Long id, String token);
 
     public String uploadProfileImage(MultipartFile image, Long employeeId) throws IOException;
 

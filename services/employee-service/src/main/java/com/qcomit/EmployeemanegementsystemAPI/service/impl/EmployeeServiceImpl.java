@@ -136,10 +136,26 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
-    public void deleteEmployee(Long id) {
-        if (!employeeRepository.existsById(id)) {
-            throw new NotFoundException("Employee not found. Id: " + id);
-        } else employeeRepository.deleteById(id);
+    public void deleteEmployee(Long id, String token) {
+        Employee employee = employeeRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Employee not found. Id: " + id));
+
+        deleteUserDetailsFromUserService(employee.getUserId(),
+                webClientBuilder
+                        .defaultHeader(HttpHeaders.AUTHORIZATION, token).build());
+
+        employeeRepository.deleteById(id);
+    }
+
+    private void deleteUserDetailsFromUserService(Long userId, WebClient webClient) {
+        webClient.delete()
+                .uri("http://localhost:8082/api/v1/user/" + userId)
+                .retrieve()
+                .bodyToMono(String.class)
+                .doOnError(throwable -> {
+                    throw new NotFoundException("User not found with id " + userId);
+                })
+                .block();
     }
 
     @Override

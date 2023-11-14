@@ -20,4 +20,6 @@ public interface UserService {
     List<UserDto> findAllUsers();
 
     UserDto findById(String id);
+
+    void deleteById(String id);
 }

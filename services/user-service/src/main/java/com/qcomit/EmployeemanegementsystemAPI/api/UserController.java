@@ -35,19 +35,26 @@ public class UserController {
     }
 
     @GetMapping
-    public List<UserDto> getAllUsers(){
+    public List<UserDto> getAllUsers() {
         return userService.findAllUsers();
     }
 
     @GetMapping("/username/{username}")
-    public ResponseEntity<UserDto> findUserDetailsByUsername(@PathVariable("username") String username){
+    public ResponseEntity<UserDto> findUserDetailsByUsername(@PathVariable("username") String username) {
         return ResponseEntity.ok().body(userService.findByUsername(username));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UserDto> findUserDetailsById(@PathVariable("id") String id){
+    public ResponseEntity<UserDto> findUserDetailsById(@PathVariable("id") String id) {
         return ResponseEntity.ok().body(userService.findById(id));
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteUserDetailsById(@PathVariable("id") String id) {
+        userService.deleteById(id);
+        return ResponseEntity.ok().body("Deleted");
+    }
+
     @PostMapping
     public ResponseEntity<UserDto> saveUser(@RequestBody @Valid UserDto user) throws IOException {
         return ResponseEntity.ok().body(userService.saveUser(user));
