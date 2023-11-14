@@ -4,7 +4,6 @@ import com.qcomit.EmployeemanegementsystemAPI.dto.EmployeeDto;
 import com.qcomit.EmployeemanegementsystemAPI.dto.UserDto;
 import com.qcomit.EmployeemanegementsystemAPI.service.UserService;
 import com.qcomit.EmployeemanegementsystemAPI.service.exceptions.NotFoundException;
-import com.qcomit.EmployeemanegementsystemAPI.util.constants.SecurityConstant;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
