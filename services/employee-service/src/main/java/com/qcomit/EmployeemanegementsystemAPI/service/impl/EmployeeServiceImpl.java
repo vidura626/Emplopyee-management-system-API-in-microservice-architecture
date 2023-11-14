@@ -165,31 +165,24 @@ public class EmployeeServiceImpl implements EmployeeService {
         WebClient webClient = webClientBuilder
                 .defaultHeader(HttpHeaders.AUTHORIZATION, token)
                 .build();
-        List userDtos = webClient.get()
-                .uri("http://localhost:8082/api/v1/user")
-                .retrieve()
-                .bodyToMono(List.class)
-                .doOnError(throwable -> {
-                    throw new RuntimeException("Something wend wrong!");
-                })
-                .block();
+
+        return performGetAll(webClient);
+    }
+
+    private List<EmployeeDto> performGetAll(WebClient webClient) {
+        List userDtos = getAllFromUserAPI(webClient);
 
         if (userDtos == null) throw new NotFoundException("Users not found");
 
+        List<UserDto> userDtoList = listToUserDtoList(userDtos);
+
         List<Employee> allEmployees = employeeRepository.findAll();
 
-        List<UserDto> userDtoList = ((List<LinkedHashMap<String, Object>>) userDtos).stream()
-                .map(user -> UserDto.builder()
-                        .user_id(Long.parseLong(user.get("user_id").toString()))
-                        .username(user.get("username").toString())
-                        .role(user.get("role").toString())
-                        .build())
-                .toList();
+        return toEmployeeDtoList(userDtoList, allEmployees);
+    }
 
-        System.out.println(userDtoList);
-
-
-        List<EmployeeDto> collect = allEmployees.stream()
+    private List<EmployeeDto> toEmployeeDtoList(List<UserDto> userDtoList, List<Employee> allEmployees) {
+        return allEmployees.stream()
                 .map(employee -> {
                     EmployeeDto dto = mapper.toDto(employee);
                     (userDtoList).stream()
@@ -201,8 +194,27 @@ public class EmployeeServiceImpl implements EmployeeService {
                             });
                     return dto;
                 }).collect(toList());
+    }
 
-        return collect;
+    private List<UserDto> listToUserDtoList(List userDtos) {
+        return ((List<LinkedHashMap<String, Object>>) userDtos).stream()
+                .map(user -> UserDto.builder()
+                        .user_id(Long.parseLong(user.get("user_id").toString()))
+                        .username(user.get("username").toString())
+                        .role(user.get("role").toString())
+                        .build())
+                .toList();
+    }
+
+    private List getAllFromUserAPI(WebClient webClient) {
+        return webClient.get()
+                .uri("http://localhost:8082/api/v1/user")
+                .retrieve()
+                .bodyToMono(List.class)
+                .doOnError(throwable -> {
+                    throw new RuntimeException("Something wend wrong!");
+                })
+                .block();
     }
 
     @Override
