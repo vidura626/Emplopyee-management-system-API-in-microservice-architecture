@@ -1,7 +1,6 @@
 package com.qcomit.EmployeemanegementsystemAPI.service;
 
 import com.qcomit.EmployeemanegementsystemAPI.dto.EmployeeDto;
-import com.qcomit.EmployeemanegementsystemAPI.dto.UserDto;
 import io.jsonwebtoken.Claims;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -15,7 +14,7 @@ public interface EmployeeService {
 
     public void deleteEmployee(Long id, String token);
 
-    public String uploadProfileImage(MultipartFile image, Long employeeId) throws IOException;
+    public String uploadProfileImage(MultipartFile image, Long employeeId, String token) throws IOException;
 
     public byte[] downloadProfileImage(Long employeeId) throws IOException;
 
@@ -26,9 +25,5 @@ public interface EmployeeService {
 
     public void refreshEmployeeAgeWithDays();
 
-    EmployeeDto findEmployeeByUserDto(UserDto user);
-
     EmployeeDto findEmployeeByUserId(Long id);
-
-    public Claims extractToken(String token);
 }

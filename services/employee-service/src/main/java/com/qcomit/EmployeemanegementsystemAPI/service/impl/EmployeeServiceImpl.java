@@ -165,27 +165,24 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
-    public String uploadProfileImage(MultipartFile image, Long employeeId) throws IOException {
+    public String uploadProfileImage(MultipartFile image, Long employeeId, String token) throws IOException {
         if (image.isEmpty()) {
             throw new NotFoundException("Image is empty");
         } else {
             Employee employee = employeeRepository.findById(employeeId)
                     .orElseThrow(() -> new NotFoundException("Employee not found. Id: " + employeeId));
-            String filePath = setFilePath(employee, image);
+
+            String filePath = setFilePath(employee, image, webClientBuilder.defaultHeader(HttpHeaders.AUTHORIZATION, token).build());
             employeeRepository.saveProfilePicture(filePath, employeeId);
             image.transferTo(new File(filePath));
             return filePath;
         }
     }
 
-    private String setFilePath(Employee employee, MultipartFile image) throws IOException {
+    private String setFilePath(Employee employee, MultipartFile image, WebClient webClient) throws IOException {
         if (employee.getProfileImage() != null) Files.deleteIfExists(new File(employee.getProfileImage()).toPath());
-
-        //todo get username from token
-//        employee.getUser().getUsername()
-        String username = "username";
-
-        return storageProperties.getProfileImage() + "Profile-image-" + username
+        UserDto userDetails = getUserDetailsFromUserService(employee.getUserId(), webClient);
+        return storageProperties.getProfileImage() + "Profile-image-" + userDetails.getUsername()
                 + Objects.requireNonNull(image.getOriginalFilename()).substring(image.getOriginalFilename().lastIndexOf("."));
     }
 
@@ -278,15 +275,6 @@ public class EmployeeServiceImpl implements EmployeeService {
         });
     }
 
-    @Override
-    public EmployeeDto findEmployeeByUserDto(UserDto user) {
-        //todo : Call to user service to check the user
-//        if (!userService.existsByUsername(user.getUsername())) {
-//            throw new NotFoundException("User not found. Username: " + user.getUsername());
-//        }
-//        return mapper.toDto(employeeRepository.findEmployeeByUser(mapper.toEntity(user)));
-        return null;
-    }
 
     @Override
     public EmployeeDto findEmployeeByUserId(Long id) {
@@ -297,8 +285,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         return mapper.toDto(byUserId);
     }
 
-    @Override
-    public Claims extractToken(String token) {
+    private Claims extractToken(String token) {
         token = token.startsWith("Bearer ") ? token.substring("Bearer ".length()) : token;
         SecretKey secretKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(SecurityConstant.SECRET_KEY));
         return (Claims) Jwts.parser()

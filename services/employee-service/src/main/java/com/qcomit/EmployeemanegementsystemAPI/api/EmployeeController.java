@@ -65,8 +65,9 @@ public class EmployeeController {
 
     @PostMapping("/profileImage")
     public ResponseEntity<String> uploadProfilePicture(@RequestParam("image") MultipartFile image,
-                                                       @RequestParam("id") Long id) throws IOException {
-        return ResponseEntity.ok().body(employeeService.uploadProfileImage(image, id));
+                                                       @RequestParam("id") Long id,
+                                                       @RequestHeader("Authorization") String token) throws IOException {
+        return ResponseEntity.ok().body(employeeService.uploadProfileImage(image, id, token));
     }
 
     @GetMapping("/profileImage/{empId}")
