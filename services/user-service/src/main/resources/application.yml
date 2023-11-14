@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/Employee_management_system?createDatabaseIfNotExist=true
+    url: jdbc:mysql://localhost:3306/ems-user-service?createDatabaseIfNotExist=true
     username: root
     password: 1234
   jpa:
