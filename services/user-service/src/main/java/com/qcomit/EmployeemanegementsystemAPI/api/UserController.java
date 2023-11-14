@@ -30,7 +30,10 @@ public class UserController {
                                              @RequestAttribute("token") String token) {
         if (authentication != null) {
             UserDto userDto = userService.findByUsername(authentication.getName());
-            return ResponseEntity.ok().body(userService.findEmployeeByUserId(userDto.getUser_id(), token));
+            EmployeeDto employeeByUserId = userService.findEmployeeByUserId(userDto.getUser_id(), token);
+            employeeByUserId.setRole(userDto.getRole());
+            employeeByUserId.setUsername(userDto.getUsername());
+            return ResponseEntity.ok().body(employeeByUserId);
         }
         throw new NotFoundException("User not found.");
     }
