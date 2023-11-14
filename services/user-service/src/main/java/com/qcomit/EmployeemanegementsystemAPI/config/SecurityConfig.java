@@ -55,7 +55,10 @@ public class SecurityConfig {
                             .requestMatchers(HttpMethod.POST, "/api/v1/user")
                             .permitAll()
                             .requestMatchers(HttpMethod.POST, "/api/v1/user")
+                            .hasAnyRole("USER", "ADMIN")
+                            .requestMatchers(HttpMethod.PUT, "/api/v1/user")
                             .hasAnyRole("USER", "ADMIN");
+
                 });
 
         http.httpBasic(withDefaults());

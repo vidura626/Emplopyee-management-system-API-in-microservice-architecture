@@ -105,24 +105,6 @@ public class EmployeeServiceImpl implements EmployeeService {
         entity.setName(Name.builder().firstName(employee.getFirstName()).lastName(employee.getLastName()).build());
         entity.setBirthday(employee.getBirthday());
         entity.setEmail(employee.getEmail());
-
-        WebClient webClient = webClientBuilder.build();
-        UserDto userDto = buildUserDetails(employee);
-        Boolean isUpdated = webClient.put()
-                .uri("http://localhost:8082/api/v1/user")
-                .header("Authorization", token)
-                .bodyValue(userDto)
-                .retrieve()
-                .bodyToMono(Boolean.class)
-                .doOnError(throwable -> {
-                    throw new NotFoundException("User not found.");
-                })
-                .block();
-
-        if (Boolean.FALSE.equals(isUpdated)) {
-            throw new NotFoundException("User not found.");
-        }
-
         entity.setAddress(mapper.toEntity(employee.getAddress()));
         entity.setContacts(mapper.toContactEntity(employee.getContacts()));
     }
