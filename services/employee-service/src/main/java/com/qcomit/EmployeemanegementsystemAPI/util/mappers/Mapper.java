@@ -1,7 +1,6 @@
 package com.qcomit.EmployeemanegementsystemAPI.util.mappers;
 
 import com.qcomit.EmployeemanegementsystemAPI.dto.EmployeeDto;
-import com.qcomit.EmployeemanegementsystemAPI.dto.UserDto;
 import com.qcomit.EmployeemanegementsystemAPI.dto.embedded.AddressDto;
 import com.qcomit.EmployeemanegementsystemAPI.dto.embedded.ContactDto;
 import com.qcomit.EmployeemanegementsystemAPI.entity.Employee;

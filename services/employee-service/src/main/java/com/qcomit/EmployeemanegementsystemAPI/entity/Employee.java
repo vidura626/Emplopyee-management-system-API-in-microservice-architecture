@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.qcomit.EmployeemanegementsystemAPI.entity.embedded.Address;
 import com.qcomit.EmployeemanegementsystemAPI.entity.embedded.Contact;
 import com.qcomit.EmployeemanegementsystemAPI.entity.embedded.Name;
-import com.qcomit.EmployeemanegementsystemAPI.dto.other_dto.User;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
