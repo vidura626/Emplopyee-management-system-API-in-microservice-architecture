@@ -234,10 +234,16 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
-    public EmployeeDto findEmployeeById(Long id) {
-        return mapper.toDto(employeeRepository
+    public EmployeeDto findEmployeeById(Long id, String token) {
+        WebClient webClient = webClientBuilder.defaultHeader(HttpHeaders.AUTHORIZATION, token).build();
+        Employee entity = employeeRepository
                 .findById(id)
-                .orElseThrow(() -> new NotFoundException("Employee not found. Id: " + id)));
+                .orElseThrow(() -> new NotFoundException("Employee not found. Id: " + id));
+        UserDto userDetails = getUserDetailsFromUserService(entity.getUserId(), webClient);
+        EmployeeDto dto = mapper.toDto(entity);
+        dto.setUsername(userDetails.getUsername());
+        dto.setRole(userDetails.getRole());
+        return dto;
     }
 
 

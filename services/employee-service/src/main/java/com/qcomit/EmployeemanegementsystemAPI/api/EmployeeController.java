@@ -32,8 +32,9 @@ public class EmployeeController {
 
 
     @GetMapping("/{id}")
-    public ResponseEntity<EmployeeDto> findEmployeeById(@PathVariable("id") String id) {
-        return ResponseEntity.ok(employeeService.findEmployeeById(Long.parseLong(id)));
+    public ResponseEntity<EmployeeDto> findEmployeeById(@PathVariable("id") String id
+            , @RequestHeader("Authorization") String token) {
+        return ResponseEntity.ok(employeeService.findEmployeeById(Long.parseLong(id), token));
     }
 
     @GetMapping("/userId/{id}")

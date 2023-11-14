@@ -22,7 +22,7 @@ public interface EmployeeService {
 
     public List<EmployeeDto> findAllEmployees(String token);
 
-    public EmployeeDto findEmployeeById(Long id);
+    public EmployeeDto findEmployeeById(Long id, String token);
 
     public void refreshEmployeeAgeWithDays();
 
