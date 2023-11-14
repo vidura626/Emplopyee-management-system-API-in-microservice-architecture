@@ -5,6 +5,7 @@ import com.qcomit.EmployeemanegementsystemAPI.filter.JwtValidationFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -50,7 +51,9 @@ public class SecurityConfig {
                 .addFilterAfter(new JwtGeneratorFilter(), BasicAuthenticationFilter.class)
                 .authorizeHttpRequests(req -> {
                     req
-                            .requestMatchers("/api/v1/user/login").authenticated();
+                            .requestMatchers("/api/v1/user/login").authenticated()
+                            .requestMatchers(HttpMethod.POST, "/api/v1/user")
+                            .permitAll();
                 });
 
         http.httpBasic(withDefaults());

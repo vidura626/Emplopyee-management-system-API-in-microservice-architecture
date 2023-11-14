@@ -8,14 +8,19 @@ import com.qcomit.EmployeemanegementsystemAPI.repository.EmployeeRepository;
 import com.qcomit.EmployeemanegementsystemAPI.service.EmployeeService;
 import com.qcomit.EmployeemanegementsystemAPI.service.exceptions.AlreadyExistException;
 import com.qcomit.EmployeemanegementsystemAPI.service.exceptions.NotFoundException;
+import com.qcomit.EmployeemanegementsystemAPI.util.constants.SecurityConstant;
 import com.qcomit.EmployeemanegementsystemAPI.util.mappers.Mapper;
 import com.qcomit.EmployeemanegementsystemAPI.util.properties.StorageProperties;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.reactive.function.client.WebClient;
 
+import javax.crypto.SecretKey;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -25,20 +30,21 @@ import java.util.List;
 import java.util.Objects;
 
 @Service
-@Transactional
 public class EmployeeServiceImpl implements EmployeeService {
 
     private final EmployeeRepository employeeRepository;
     private final StorageProperties storageProperties;
+    private final WebClient.Builder webClientBuilder;
     private final Mapper mapper;
 
     @Autowired
     public EmployeeServiceImpl(EmployeeRepository employeeRepository,
                                Mapper mapper,
-                               StorageProperties storageProperties) {
+                               StorageProperties storageProperties, WebClient.Builder webClientBuilder) {
         this.employeeRepository = employeeRepository;
         this.storageProperties = storageProperties;
         this.mapper = mapper;
+        this.webClientBuilder = webClientBuilder;
     }
 
     @Override
@@ -47,15 +53,29 @@ public class EmployeeServiceImpl implements EmployeeService {
             throw new NotFoundException("Role not found.");
         } else employee.setRole("ROLE_" + employee.getRole());
 
-        //todo: Call to user service to check the user
-//        if (userService.existsByUsername(employee.getUsername())) {
-//            throw new AlreadyExistException("Username already exists. Username: " + employee.getUsername());
-//        }
-//        else
+        WebClient webClient = webClientBuilder.build();
+
+                //todo: Call to user service to check the user
+                UserDto build = UserDto.builder()
+                .username(employee.getUsername())
+                .role(employee.getRole())
+                .password(employee.getPassword())
+                .build();
+        UserDto userDto = webClient.post()
+                .uri("http://localhost:8082/api/v1/user")
+                .bodyValue(build)
+                .retrieve()
+                .bodyToMono(UserDto.class)
+                .doOnError(throwable -> {
+                    throw new AlreadyExistException("Username is already exists");
+                })
+                .block();
+
         if (employeeRepository.existsByEmail(employee.getEmail())) {
             throw new AlreadyExistException("Email already exists. Email: " + employee.getEmail());
         } else {
             Employee entity = mapper.toEntity(employee);
+            entity.setUserId(userDto.getUser_id());
             setCurrentAgeWithDays(entity);
             return employeeRepository.save(entity).getEmployee_id();
         }

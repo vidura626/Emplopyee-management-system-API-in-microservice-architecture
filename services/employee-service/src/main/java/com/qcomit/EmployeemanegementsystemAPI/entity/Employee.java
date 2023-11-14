@@ -38,7 +38,7 @@ public class Employee {
     private Date birthday;
     private String profileImage;
 //    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private String userId;
+    private Long userId;
     private int current_age_in_days;
 
     @CreationTimestamp
