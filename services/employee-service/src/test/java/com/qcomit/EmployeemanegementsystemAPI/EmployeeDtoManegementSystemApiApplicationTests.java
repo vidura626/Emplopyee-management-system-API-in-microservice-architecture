@@ -1,10 +1,10 @@
-package com.qcomit.employeeservice;
+package com.qcomit.EmployeemanegementsystemAPI;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class EmployeeServiceApplicationTests {
+class EmployeeDtoManegementSystemApiApplicationTests {
 
 	@Test
 	void contextLoads() {
